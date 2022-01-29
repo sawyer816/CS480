@@ -1,3 +1,6 @@
+#Sawyer Thompson 
+#RedId: 823687079
+
 # CXX Make variable for compiler
 CXX=g++ -g
 # Make variable for compiler options
