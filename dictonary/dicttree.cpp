@@ -109,6 +109,8 @@ void dicttree::readInDict(dictNode *root, char *FileName)
         char *word = strtok(char_arr, delimiters);
         while (word != nullptr)
         {
+         std:: cout<< word;
+
             //adds word to the dictionary tree
             add(root, word);
             word = strtok(NULL, delimiters);
