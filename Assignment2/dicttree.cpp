@@ -13,7 +13,7 @@
 #include "populatetree.h"
 #include "execstatus.h"
 
-/* creates a new dictNode and returns it */
+// creates a new dictNode and returns it
 dictNode *newNode(void)
 {
     struct dictNode *current = new dictNode;
@@ -24,7 +24,7 @@ dictNode *newNode(void)
     return current;
 }
 
-/* adds the parametized wordBeingInserted into the dictionary tree */
+// adds the parametized wordBeingInserted into the dictionary tree
 bool dicttree::add(dictNode *root, char *wordBeingInserted)
 {
     // creates an defines an instance of the struct
@@ -59,10 +59,10 @@ bool dicttree::add(dictNode *root, char *wordBeingInserted)
     return true;
 }
 
-/*Finds the ending node of the string and returns it */
+//Finds the ending node of the string and returns it
 dictNode *dicttree::findEndingNodeOfAStr(dictNode *root, char *wordBeingSearched)
 {
-    struct dictNode *current = root; // creates an defines an instance of the struct
+    struct dictNode *current = root; //creates an defines an instance of the struct
     for (int i = 0; i < strlen(wordBeingSearched); i++)
     {
         char currentLetter = std::tolower(wordBeingSearched[i]); // converts wordBeingSearched to lower case

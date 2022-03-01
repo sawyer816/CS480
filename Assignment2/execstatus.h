@@ -11,7 +11,7 @@
 #ifndef execstatus_h
 #define execstatus_h
 
-// included files
+//included files
 #include "dicttree.h"
 #include <sys/stat.h>
 

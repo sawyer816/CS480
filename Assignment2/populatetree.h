@@ -8,7 +8,7 @@
  *  Description: header file that defines populate tree worker thread
  */
 
-// included files
+//included files
 #include "dicttree.h"
 #include "execstatus.h"
 
@@ -16,4 +16,4 @@
  * Worker thread that puts the words in a dictionary
  * into a trie tree.
  */
-void *populatetree(void *);
+void *populate(void *);
