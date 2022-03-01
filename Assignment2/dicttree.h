@@ -17,14 +17,14 @@
 
 #define ALPHABETSIZE 27
 
-// defines a struct dictNode
+/* defines a struct dictNode */
 struct dictNode
 {
     bool isWord = false;
     struct dictNode *next[ALPHABETSIZE];
 };
 
-// defines a dicttree
+/*defines a dicttree */
 class dicttree
 {
 
