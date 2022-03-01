@@ -1,3 +1,4 @@
+
 /* FILEHEADER
  * Sawyer Thompson
  * RedID: 823687079
@@ -8,7 +9,6 @@
  *  Description: main cpp file that runs and joins two threads
  *  and checks for optional arguements
  */
-
 // Included Files
 #include "populatetree.h"
 #include "countwords.h"
@@ -17,170 +17,167 @@
 /* progressbar helper function */
 void printProgressBar(int result)
 {
-    if (result == 0)
-    {
-        std::cout << HASHSYMBOL;
-    }
-    else
-    {
-        std::cout << PROGRESSSYMBOL;
-    }
+  if (result == 0)
+  {
+    std::cout << HASHSYMBOL;
+  }
+  else
+  {
+    std::cout << PROGRESSSYMBOL;
+  }
+  std::cout.flush();
 }
 
 /* facilitates the progress bar of the threads */
 void progressBar(EXEC_STATUS *ex)
 {
-    // variable initialization
-    double curInterval;
-    double progress;
-    int count;
 
-    // variables needed for the struct
-    double dictCharsProcessed;
-    double dictTotalChars;
-    double testFileCharsProcessed;
-    double testFileTotalChars;
+  // variable initialization
+  double curInterval = 0;
+  double progress = 0;
+  int count = 0;
 
-    // hash and mark definitions
-    int hash = ex->hashmarkInterval;
-    int mark = ex->numOfProgressMarks;
+  // variables needed for the struct
+  double dictCharsProcessed;
+  double testFileCharsProcessed;
 
-    double interval = (100.000 / mark); // interval of each mark
+  // hash and mark definitions
+  int hash = ex->hashmarkInterval;
+  int mark = ex->numOfProgressMarks;
 
-    // runs first thread
-    while (!ex->taskCompleted[DICTSRCFILEINDEX])
+  double interval = (100.000 / mark); // interval of each mark
+
+  //runs first thread
+  while (!ex->taskCompleted[DICTSRCFILEINDEX])
+  {
+    //gets and updateds the progress between the numofchars and totalchars
+    dictCharsProcessed = *(ex->numOfCharsProcessedFromFile[DICTSRCFILEINDEX]); 
+    progress = 100 * (dictCharsProcessed / ex->totalNumOfCharsInFile[DICTSRCFILEINDEX]); 
+
+     // checks if progress is greater than interval
+    if (progress > curInterval && progress < 100)
     {
-        dictCharsProcessed = *(ex->numOfCharsProcessedFromFile[DICTSRCFILEINDEX]); // gets chars processed in the file
-        dictTotalChars = ex->totalNumOfCharsInFile[DICTSRCFILEINDEX];              // gets total chars processed in the file
-        progress = 100 * (dictCharsProcessed / dictTotalChars);                    // gets the progress %
-
-        // checks if progress is greater than interval
-        if (progress > curInterval && progress < 100)
-        {
-            count++;                   // increases count of PROGRESSSYMBOL
-            int result = count % hash; // checks if Hash Interval is in correct location
-            printProgressBar(result);
-            curInterval += interval; // updates interval with percent needed
-            std::cout.flush();
-        }
-
-        // checks if progress is finished
-        if (progress == 100)
-        {
-            ex->taskCompleted[DICTSRCFILEINDEX] = true;
-        }
+      count++; // increases count of PROGRESSSYMBOL
+      int result = count % hash; // checks if Hash Interval is in correct location
+      printProgressBar(result);
+      curInterval += interval; // updates interval with percent needed
     }
-
-    // resets variables
-    count = 0;
-    curInterval = 0;
-
-    // runs second thread
-    while (!ex->taskCompleted[TESTFILEINDEX])
+    // checks if progress is finished
+    if (progress == 100)
     {
-        testFileCharsProcessed = *(ex->numOfCharsProcessedFromFile[TESTFILEINDEX]); // gets chars processed in the test file
-        testFileTotalChars = ex->totalNumOfCharsInFile[TESTFILEINDEX];              // gets total chars  in the test file
-        progress = 100 * (testFileCharsProcessed / testFileTotalChars);             // gets the progress %
-        if (progress > curInterval && progress < 100)
-        {
-            count++; // increases count of PROGRESSSYMBOL
-            int result = count % hash;
-            printProgressBar(result);
-            std::cout.flush();
-            curInterval += interval;
-        }
-
-        // checks if progress is finished
-        if (progress == 100)
-        {
-            ex->taskCompleted[TESTFILEINDEX] = true;
-        }
+      ex->taskCompleted[DICTSRCFILEINDEX] = true;
     }
+  }
+  //resets variables
+  curInterval = 0;
+  count = 0;
+
+  //runs second thread
+  while (!ex->taskCompleted[TESTFILEINDEX])
+  {
+    //gets and updateds the progress between the numofchars and totalchars
+    dictCharsProcessed = *(ex->numOfCharsProcessedFromFile[TESTFILEINDEX]); 
+    progress = 100 * (dictCharsProcessed / ex->totalNumOfCharsInFile[TESTFILEINDEX]); 
+
+     // checks if progress is greater than interval
+    if (progress > curInterval && progress < 100)
+    {
+      count++; // increases count of PROGRESSSYMBOL
+      int result = count % hash; // checks if Hash Interval is in correct location
+      printProgressBar(result);
+      curInterval += interval; // updates interval with percent needed
+    }
+    // checks if progress is finished
+    if (progress == 100)
+    {
+      ex->taskCompleted[TESTFILEINDEX] = true;
+    }
+  }
 };
 
 /* Driver Function */
 int main(int argc, char *argv[])
 {
-    // initialize variables
-    int opt;
-    long initialized;
+  // initialize variables
+  int opt;
+  long initialized;
 
-    // initialize struct
-    EXEC_STATUS *ex = new EXEC_STATUS();
+  // initialize struct
+  EXEC_STATUS *ex = new EXEC_STATUS();
 
-    // initialize variables in struct to defaults
-    ex->numOfCharsProcessedFromFile[NUMOFFILES - 1] = new (long);
-    ex->dictRootNode = new dictNode();
-    ex->minNumOfWordsWithAPrefixForPrinting = DEFAULT_MINNUM_OFWORDS_WITHAPREFIX;
-    ex->numOfCharsProcessedFromFile[DICTSRCFILEINDEX] = &initialized;
-    ex->numOfCharsProcessedFromFile[TESTFILEINDEX] = &initialized;
-    ex->hashmarkInterval = DEFAULT_HASHMARKINTERVAL;
-    ex->numOfProgressMarks = DEFAULT_NUMOF_MARKS;
-    ex->minNumOfWordsWithAPrefixForPrinting = DEFAULT_MINNUM_OFWORDS_WITHAPREFIX;
+  // initialize variables in struct to defaults
+  ex->numOfCharsProcessedFromFile[NUMOFFILES - 1] = new (long);
+  ex->dictRootNode = new dictNode();
+  ex->minNumOfWordsWithAPrefixForPrinting = DEFAULT_MINNUM_OFWORDS_WITHAPREFIX;
+  ex->numOfCharsProcessedFromFile[DICTSRCFILEINDEX] = &initialized;
+  ex->numOfCharsProcessedFromFile[TESTFILEINDEX] = &initialized;
+  ex->hashmarkInterval = DEFAULT_HASHMARKINTERVAL;
+  ex->numOfProgressMarks = DEFAULT_NUMOF_MARKS;
+  ex->minNumOfWordsWithAPrefixForPrinting = DEFAULT_MINNUM_OFWORDS_WITHAPREFIX;
 
-    // ensures there is at least 2 argumenets
-    if (argv[optind] == NULL || argv[optind + 1] == NULL)
+  // ensures there is at least 2 argumenets
+  if (argv[optind] == NULL || argv[optind + 1] == NULL)
+  {
+    printf("Mandatory argument(s) missing\n");
+    exit(1);
+  }
+
+  // sets the path names
+  int path = DICTSRCFILEINDEX;
+  for (; optind <= NUMOFFILES; optind++)
+  {
+    ex->filePath[path] = argv[optind];
+    path = TESTFILEINDEX;
+  }
+
+  // goes through optional arguements using getopt
+  while ((opt = getopt(argc, argv, ":n:p:h:")) != -1)
+  {
+    switch (opt)
     {
-        printf("Mandatory argument(s) missing\n");
+    case 'n':
+      ex->minNumOfWordsWithAPrefixForPrinting = atoi(optarg);
+      if (ex->numOfProgressMarks < MIN_NUMOF_MARKS)
+      {
+        std::cout << "Number of progress marks must be greater than " << MINNUMOFWORDS;
         exit(1);
+      }
+      break;
+    case 'p':
+      ex->numOfProgressMarks = atoi(optarg); // sets progressmarks
+      // checks if numOfProgressMarks is the minimum
+      if (ex->numOfProgressMarks < MIN_NUMOF_MARKS)
+      {
+        std::cout << "Number of progress marks must be a number and at least " << MIN_NUMOF_MARKS << std::endl;
+        exit(1);
+      }
+      break;
+    case 'h':
+      ex->hashmarkInterval = atoi(optarg); // sets hash
+      // checks if numOfProgressMarks is the minimum
+      if (ex->hashmarkInterval > MAX_NUMOF_HASH)
+      {
+        std::cout << "Hash mark interval for progress must be a number, greater than 0, and less than or equal to " << MAX_NUMOF_HASH << std::endl;
+        exit(1);
+      }
+      break;
+    case '?': // checks if unkown option and exits
+      printf("unknown option: %c\n", optopt);
+      exit(1);
     }
+  }
 
-    // sets the path names
-    int path = DICTSRCFILEINDEX;
-    for (; optind <= NUMOFFILES; optind++)
-    {
-        ex->filePath[path] = argv[optind];
-        path = TESTFILEINDEX;
-    }
+  // initialize threads
+  pthread_t thread1;
+  pthread_t thread2;
 
-    // goes through optional arguements using getopt
-    while ((opt = getopt(argc, argv, ":n:p:h:")) != -1)
-    {
-        switch (opt)
-        {
-        case 'n':
-            ex->minNumOfWordsWithAPrefixForPrinting = atoi(optarg);
-            if (ex->numOfProgressMarks < MIN_NUMOF_MARKS)
-            {
-                std::cout << "Number of progress marks must be greater than " << MINNUMOFWORDS;
-                exit(1);
-            }
-            break;
-        case 'p':
-            ex->numOfProgressMarks = atoi(optarg); // sets progressmarks
-            // checks if numOfProgressMarks is the minimum
-            if (ex->numOfProgressMarks < MIN_NUMOF_MARKS)
-            {
-                std::cout << "Number of progress marks must be a number and at least " << MIN_NUMOF_MARKS << std::endl;
-                exit(1);
-            }
-            break;
-        case 'h':
-            ex->hashmarkInterval = atoi(optarg); // sets hash
-            // checks if numOfProgressMarks is the minimum
-            if (ex->hashmarkInterval > MAX_NUMOF_HASH)
-            {
-                std::cout << "Hash mark interval for progress must be a number, greater than 0, and less than or equal to " << MAX_NUMOF_HASH << std::endl;
-                exit(1);
-            }
-            break;
-        case '?': // checks if unkown option and exits
-            printf("unknown option: %c\n", optopt);
-            exit(1);
-        }
-    }
+  // create threads
+  pthread_create(&thread1, NULL, &populatetree, (void *)ex);
+  pthread_create(&thread2, NULL, &countwords, (void *)ex);
 
-    // initialize threads
-    pthread_t thread1;
-    pthread_t thread2;
+  // runs progressBar
+  progressBar(ex);
 
-    // create threads
-    pthread_create(&thread1, NULL, &populatetree, (void *)ex);
-    pthread_create(&thread2, NULL, &countwords, (void *)ex);
-
-    // runs progressBar
-    progressBar(ex);
-
-    pthread_exit(NULL);
-    return 0;
+  pthread_exit(NULL);
+  return 0;
 };
