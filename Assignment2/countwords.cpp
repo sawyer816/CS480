@@ -1,26 +1,25 @@
-/* FILEHEADER
- * Sawyer Thompson
+/* Sawyer Thompson
  * RedID: 823687079
- * February 28, 2022
+ * January 25, 2021
  * CS 480-3
  * Professor Shen
  *
- *  Description: countwords cpp that runs the countwords thread
- *  and does the logic to count the number of words in the dictionary
- *  that have the given word as a prefix. 
+ *  Description: Driver File that has methods necessary to read in a file and
+    count the words present with a specified prefix in the dictionary tree
  */
 
 #include "countwords.h"
 
-// using a prefix node, we are able to recursively traverse the dict tree
+/* uses a prefix node, to recursively traverse the dict tree */
 int countWords(dictNode *prefix)
 {
+    int count = 0; // initialize counter
     // base case
     if (!prefix)
     {
         return 0;
     }
-    int count = 0;
+    // checks for each letter
     for (int i = 0; i < ALPHABETSIZE; ++i)
     {
         // adds count to the next pointer
@@ -34,72 +33,76 @@ int countWords(dictNode *prefix)
     return count;
 }
 
-// reads in root node and file name
+/*
+ * countwords thread, a worker thread that counts the words of a dictionary
+ * that have the given prefix of a word in another file.
+ */
 void *countwords(void *ptr)
 {
     const char *delimiters = "\n\r !\"#$%&()*+,-./0123456789:;<=>?@[\\]^_`{|}~"; // enables tokenization
-    std::ifstream dictstream;
+    std::ifstream dictstream;                                                    // initialize ifstream
+
     EXEC_STATUS *exec = (EXEC_STATUS *)ptr; // initializes exec_status ptr
-    struct stat buffer;
-    stat(exec->filePath[TESTFILEINDEX], &buffer);
-    exec->totalNumOfCharsInFile[TESTFILEINDEX] = buffer.st_size;
+
+    // while loop to ensure thread doesn't start before the completion of the thread populate
     while (!exec->taskCompleted[0])
     {
-    } // ensures that this thread waits for completetion of populate
-    // initialize for file opening and writing
+    }
+
+    // opens the stream and checks that it is a valid filepath
     dictstream.open(exec->filePath[1]);
     if (dictstream.is_open())
     {
+        // initialize necessary variables
         std::string line;
-        std::ofstream output;
-        output.open("output.txt");
+        long wordlength = 0;
+        long totalchar = 0;
+        char *char_arr;
 
-        // grabs the amount of characters in the file
+        // creates and opens an output file named countwords_output.txt
+        std::ofstream output;
+        output.open("countwords_output.txt");
+
+        // finds and and sets the total number of characters in the file
         struct stat buffer;
         stat(exec->filePath[TESTFILEINDEX], &buffer);
         int size = buffer.st_size;
-
-        // initializes values in
         exec->totalNumOfCharsInFile[TESTFILEINDEX] = size;
-        long wordlength = 0;
-        long totalchar = 0;
+
+        // sets necessary initialization for struct exec
         exec->numOfCharsProcessedFromFile[TESTFILEINDEX] = &totalchar;
 
+        // runs through the stream if there is a nextline
         while (std::getline(dictstream, line))
         {
-            char *char_arr;
-            // std::cout << "hi";
-            // transforms string to char
-            char_arr = &line[0];
-            char *word = strtok(char_arr, delimiters);
-            wordlength = (long)line.length() + 1;
+            char_arr = &line[0];                       // converts line to character array
+            char *word = strtok(char_arr, delimiters); // tokenizes words
+            wordlength = (long)line.length() + 1;      // sets wordlength to the length of the line
+
+            // checks each word in the line and makes sure it exists
             while (word != nullptr)
             {
-
-                exec->tree->add(exec->dictRootNode, word);
-
                 exec->wordCountInFile[TESTFILEINDEX] += 1;
-                // std::cout << *(exec->numOfCharsProcessedFromFile[TESTFILEINDEX]) << "\n";
-                // searches the word and returns the prefix node
+                // sets prefix to the last node of word
                 dictNode *prefix = exec->tree->findEndingNodeOfAStr(exec->dictRootNode, word);
+
+                // checks and increments the number of times the prefix is in the dictionary
                 if (countWords(prefix) >= exec->minNumOfWordsWithAPrefixForPrinting)
                 {
-                    // std::cout<<exec->minNumOfWordsWithAPrefixForPrinting;
-                    // prefix node used to print out the amount of words in dictionary
-                    // that begin with prefix
                     output << word << " " << countWords(prefix) << "\n";
                 }
                 word = strtok(NULL, delimiters);
             }
-
-            totalchar += wordlength;
+            totalchar += wordlength; // increments the total chars by the line chars
         }
         output.close();
         dictstream.close();
+        // prints the number of words in the file
         std::cout << std::endl
-                  << "There are " << exec->wordCountInFile[TESTFILEINDEX] << " words in " << exec->filePath[TESTFILEINDEX] << "." << std::endl;
+                  << "There are " << exec->wordCountInFile[TESTFILEINDEX]
+                  << " words in " << exec->filePath[TESTFILEINDEX] << "." << std::endl;
     }
-    else
+    else // prints out message and exits if bad file
     {
         std::cout << "Unable to Open <<" << exec->filePath[TESTFILEINDEX] << ">>" << std::endl;
         exit(1);

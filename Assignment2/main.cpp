@@ -6,7 +6,7 @@
  * Professor Shen
  *
  *  Description: main cpp file that runs and joins two threads
- *  and checks for optional arguements 
+ *  and checks for optional arguements
  */
 
 // Included Files
@@ -14,7 +14,7 @@
 #include "countwords.h"
 #include <unistd.h>
 
-// progressbar helper function
+/* progressbar helper function */
 void printProgressBar(int result)
 {
     if (result == 0)
@@ -27,7 +27,7 @@ void printProgressBar(int result)
     }
 }
 
-// facilitates the progress bar of the threads
+/* facilitates the progress bar of the threads */
 void progressBar(EXEC_STATUS *ex)
 {
     // variable initialization
@@ -35,17 +35,19 @@ void progressBar(EXEC_STATUS *ex)
     double progress;
     int count;
 
+    // variables needed for the struct
     double dictCharsProcessed;
     double dictTotalChars;
     double testFileCharsProcessed;
     double testFileTotalChars;
-    
+
+    // hash and mark definitions
     int hash = ex->hashmarkInterval;
     int mark = ex->numOfProgressMarks;
 
     double interval = (100.000 / mark); // interval of each mark
 
-    //runs first thread
+    // runs first thread
     while (!ex->taskCompleted[DICTSRCFILEINDEX])
     {
         dictCharsProcessed = *(ex->numOfCharsProcessedFromFile[DICTSRCFILEINDEX]); // gets chars processed in the file
@@ -96,7 +98,7 @@ void progressBar(EXEC_STATUS *ex)
     }
 };
 
-// Driver Function
+/* Driver Function */
 int main(int argc, char *argv[])
 {
     // initialize variables
@@ -107,7 +109,7 @@ int main(int argc, char *argv[])
     EXEC_STATUS *ex = new EXEC_STATUS();
 
     // initialize variables in struct to defaults
-    ex->numOfCharsProcessedFromFile[NUMOFFILES-1] = new (long);
+    ex->numOfCharsProcessedFromFile[NUMOFFILES - 1] = new (long);
     ex->dictRootNode = new dictNode();
     ex->minNumOfWordsWithAPrefixForPrinting = DEFAULT_MINNUM_OFWORDS_WITHAPREFIX;
     ex->numOfCharsProcessedFromFile[DICTSRCFILEINDEX] = &initialized;
@@ -123,7 +125,15 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    //goes through optional arguements using getopt
+    // sets the path names
+    int path = DICTSRCFILEINDEX;
+    for (; optind <= NUMOFFILES; optind++)
+    {
+        ex->filePath[path] = argv[optind];
+        path = TESTFILEINDEX;
+    }
+
+    // goes through optional arguements using getopt
     while ((opt = getopt(argc, argv, ":n:p:h:")) != -1)
     {
         switch (opt)
@@ -137,7 +147,7 @@ int main(int argc, char *argv[])
             }
             break;
         case 'p':
-            ex->numOfProgressMarks = atoi(optarg);//sets progressmarks
+            ex->numOfProgressMarks = atoi(optarg); // sets progressmarks
             // checks if numOfProgressMarks is the minimum
             if (ex->numOfProgressMarks < MIN_NUMOF_MARKS)
             {
@@ -146,7 +156,7 @@ int main(int argc, char *argv[])
             }
             break;
         case 'h':
-            ex->hashmarkInterval = atoi(optarg); //sets hash
+            ex->hashmarkInterval = atoi(optarg); // sets hash
             // checks if numOfProgressMarks is the minimum
             if (ex->hashmarkInterval > MAX_NUMOF_HASH)
             {
@@ -154,27 +164,21 @@ int main(int argc, char *argv[])
                 exit(1);
             }
             break;
-        case '?': //checks if unkown option and exits
+        case '?': // checks if unkown option and exits
             printf("unknown option: %c\n", optopt);
             exit(1);
         }
     }
-    //sets the path names for mandatory arguements
-    int index = optind;
-    if(index<argc){
-        ex->filePath[DICTSRCFILEINDEX] = argv[index];
-        ex->filePath[TESTFILEINDEX] = argv[index+1];
-    }
 
-    //initialize threads
+    // initialize threads
     pthread_t thread1;
     pthread_t thread2;
 
-    //create threads
-    pthread_create(&thread1, NULL, &populate, (void *)ex);
+    // create threads
+    pthread_create(&thread1, NULL, &populatetree, (void *)ex);
     pthread_create(&thread2, NULL, &countwords, (void *)ex);
 
-    //runs progressBar
+    // runs progressBar
     progressBar(ex);
 
     pthread_exit(NULL);
