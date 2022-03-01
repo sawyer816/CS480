@@ -1,12 +1,12 @@
-/* Sawyer Thompson
+/* FILE HEADER
+ * Sawyer Thompson
  * RedID: 823687079
- * January 25, 2021
+ * February 28, 2021
  * CS 480-3
  * Professor Shen
- * 
+ *
  *  Description: dicctree header file that provides the structure of a dictNode
- *  as it is used in both countwords.cpp and dicttree.cpp, and declares variables
- *  implemented in dicctree.cpp
+ *  and declares variables that will be implemented in dicctree.cpp
  */
 
 #ifndef dicttree_h
@@ -14,25 +14,25 @@
 #include <iostream>
 #include <string.h>
 #include <fstream>
-#define NUMOFCHARS 27
-//defines a struct dictNode
+
+#define ALPHABETSIZE 27
+
+// defines a struct dictNode
 struct dictNode
 {
-    //number of characters in the alphabet
-    
     bool isWord = false;
-    struct dictNode *next[NUMOFCHARS];
+    struct dictNode *next[ALPHABETSIZE];
 };
 
-//defines a dicttree
+// defines a dicttree
 class dicttree
 {
-    
+
 public:
-    //methods to be implemented
+    // methods to be implemented
     const char *delimiters = "\n\r !\"#$%&()*+,-./0123456789:;<=>?@[\\]^_`{|}~";
     bool add(dictNode *root, char *wordBeingInserted);
     dictNode *findEndingNodeOfAStr(dictNode *root, char *strBeingSearched);
     void display(dictNode *root, char str[], int level);
 };
-#endif 
+#endif
